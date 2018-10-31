@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use Term::Spinner;
+
+my $spinner = Term::Spinner->new();
 
 my @str1 = split(//, '1234567890123456789012345678901');
 my @str2 = split(//, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
@@ -10,6 +13,7 @@ $| = 1;
 
 while (1) {
 	foreach (@str) {
+                #$spinner->advance(0);
 		if (ord($_) >= 0x20 && ord($_) <= 0x7F) {
 			print STDOUT $_;
 		}
