@@ -37,15 +37,15 @@ sub session_start {
     #$socket->mcast_add(MCAST_GROUP) || die $!;
     #$socket->mcast_dest(MCAST_DESTINATION);
 
-    open(my $stdout, '-|', CMD) || die $!;
-    $kernel->select_read($stdout, "got_input", $socket);
+    open(my $handle, '-|', CMD) || die $!;
+    $kernel->select_read($handle, "got_input", $socket);
 }
 
 sub got_input {
-    my ($kernel, $stdout, $socket) = @_[KERNEL, ARG0, ARG2];
+    my ($kernel, $handle, $socket) = @_[KERNEL, ARG0, ARG2];
 
     my $buffer = '';
-    while (sysread($stdout, $buffer, DATAGRAM_MAXLEN)) {
+    while (sysread($handle, $buffer, DATAGRAM_MAXLEN)) {
         print $buffer;
         #my $destination = $socket->mcast_dest;
         #send($socket, $buffer, 0, $destination) || warn $!;

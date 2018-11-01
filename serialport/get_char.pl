@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-$| = 1;
+use IO::Handle;
+STDOUT->autoflush(1);
 
 my $file = shift;
-
 open(my $fh, "<", $file) || die $!;
 
 while (defined(my $c = getc $fh)) {

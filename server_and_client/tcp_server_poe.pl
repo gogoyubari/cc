@@ -3,12 +3,13 @@ use strict;
 use warnings;
 use POE qw(Component::Server::TCP Filter::Stream); # libpoe-perl
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
+use IO::Handle 'autoflush';
+use Term::Spinner;
 use constant PORT => 6666;
-use constant MAXLEN => 2048;
 use constant CMD => './stdout_test.pl | ../pipe.pl';
+STDOUT->autoflush(1);
 
-# デフォルトの出力先(STDOUT)のコマンドバッファリングを有効にする
-$| = 1;
+my $spinner = Term::Spinner->new();
 
 # クライアントを管理するハッシュ
 my %clients;
@@ -35,28 +36,31 @@ exit;
 
 
 sub session_start {
-    my $kernel = $_[KERNEL];
-    open(my $stdout, '-|', CMD) || die $!;
-    $kernel->select_read($stdout, "got_input");
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
+
+    open(my $handle, '-|', CMD) || die $!;
+    $heap->{wheel} = POE::Wheel::ReadWrite->new(
+        InputHandle => $handle,
+        OutputHandle => \*STDOUT,
+        InputFilter => POE::Filter::Stream->new(),
+        InputEvent => "got_input",
+    );
 }
 
 sub got_input {
-    my $stdout = $_[ARG0];
-
-    my $buffer = '';
-    while (sysread($stdout, $buffer, MAXLEN)) {
-        #print $buffer;
-        foreach my $id (keys %clients) {
-            $buffer =~ s/\n/\r\n/;
-            $clients{$id}->put($buffer);
-        }
+    my $data = $_[ARG0];
+    $data =~ s/\n/\r\n/;
+    foreach my $id (keys %clients) {
+        $clients{$id}->put($data);
     }
+    $spinner->advance();
 }
 
-# ソケットに対する Nagle のアルゴリズムを無効にする
 sub client_preconnect {
     my $socket = $_[ARG0];
+    # ソケットに対する Nagle のアルゴリズムを無効にする
     setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
+    # It must return a valid client socket if the connection is acceptable.
     return $socket;
 }
 
@@ -74,11 +78,12 @@ sub client_connected {
 sub client_input {
     my ($kernel, $heap, $input) = @_[KERNEL, HEAP, ARG0];
 
-    if($input =~ /quit/){
+    $input =~ s/\W//g;
+    if($input =~ /quit/i){
         # クライアントを切断
         $kernel->yield("shutdown");
     }
-    elsif($input =~ /count/){
+    elsif($input =~ /count/i){
         # 接続中のクライアントの数を返す
         $heap->{client}->put(scalar(keys %clients));
     }

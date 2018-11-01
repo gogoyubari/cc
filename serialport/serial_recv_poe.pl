@@ -3,9 +3,10 @@ use strict;
 use warnings;
 use POE qw(Wheel::ReadWrite Filter::Stream);
 use Device::SerialPort;
+use IO::Handle 'autoflush';
 use Symbol qw(gensym);
 use constant PORT => '/dev/ttyUSB1';
-$| = 1;
+STDOUT->autoflush(1);
 
 POE::Session->create(
     inline_states => {

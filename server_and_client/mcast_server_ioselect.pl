@@ -7,12 +7,12 @@ use IO::Socket::Multicast; # libio-socket-multicast-perl
 use constant TIMEOUT => 0.5;
 use constant DATAGRAM_MAXLEN => 1024;
 use constant DESTINATION => '239.1.1.1:6666';
-use constant CMD => '/home/naka/cc/sample/stdout_test.pl | /home/naka/cc/pipe.pl';
+use constant CMD => './stdout_test.pl | ../pipe.pl';
 
 $| = 1;
 
-open(my $stdout, '-|', CMD) || die $!;
-my $selector = IO::Select->new($stdout);
+open(my $handle, '-|', CMD) || die $!;
+my $selector = IO::Select->new($handle);
 
 my $socket = IO::Socket::Multicast->new(
     Proto=>'udp',
@@ -22,7 +22,7 @@ my $socket = IO::Socket::Multicast->new(
 while (1) {
     my $buffer = '';
     if ($selector->can_read(TIMEOUT)) {
-        sysread($stdout, $buffer, DATAGRAM_MAXLEN) || warn $!;
+        sysread($handle, $buffer, DATAGRAM_MAXLEN) || die $!;
         print $buffer;
         $socket->send($buffer) || warn $!;
     }
