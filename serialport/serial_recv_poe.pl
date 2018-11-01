@@ -6,6 +6,8 @@ use Device::SerialPort;
 use IO::Handle 'autoflush';
 use Symbol qw(gensym);
 use constant PORT => '/dev/ttyUSB1';
+
+binmode STDOUT;
 STDOUT->autoflush(1);
 
 POE::Session->create(
