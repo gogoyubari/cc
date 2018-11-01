@@ -1,18 +1,19 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use FindBin;
 use IO::Handle 'autoflush';
-#binmode STDOUT;
 STDOUT->autoflush(1);
+my $file = "$FindBin::Bin/data.bin";
 
-my $file = shift;
-open(my $fh, "<", $file) || die $!;
-#binmode $fh;
+while (1) {
+    open(my $fh, "<", $file) || die $!;
+    binmode $fh;
 
-while (defined(my $c = getc $fh)) {
-    print $c;
-#    select(undef, undef, undef, 0.01);
+    while (defined(my $c = getc $fh)) {
+        print $c;
+    }
+    close($fh);
+    sleep(1);
 }
-
-close($fh);
 exit 0;

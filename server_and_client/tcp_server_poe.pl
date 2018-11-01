@@ -5,9 +5,17 @@ use POE qw(Component::Server::TCP Filter::Stream); # libpoe-perl
 use Socket qw(IPPROTO_TCP TCP_NODELAY);
 use IO::Handle 'autoflush';
 use Term::Spinner;
+use Pod::Usage 'pod2usage';
 use constant PORT => 6666;
-use constant CMD => './stdout_test.pl | ../pipe.pl';
 STDOUT->autoflush(1);
+
+=head1 SYNOPSIS
+
+script.pl comman1 command2 ...
+
+=cut
+pod2usage unless @ARGV;
+my $cmd = join(' | ', @ARGV);
 
 my $spinner = Term::Spinner->new();
 
@@ -38,7 +46,7 @@ exit;
 sub session_start {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    open(my $handle, '-|', CMD) || die $!;
+    open(my $handle, '-|', $cmd) || die $!;
     $heap->{wheel} = POE::Wheel::ReadWrite->new(
         InputHandle => $handle,
         OutputHandle => \*STDOUT,
