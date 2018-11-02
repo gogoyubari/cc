@@ -1,0 +1,1 @@
+/usr/bin/perl ./server_and_client/tcp_server_poe.pl ./serialport/recv_serial_poe.pl ./parse/ga_parse.pl ./pipe.pl

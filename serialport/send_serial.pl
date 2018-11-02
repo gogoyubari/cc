@@ -22,7 +22,7 @@ open(my $fh, "<", $file) || die $!;
 binmode $fh;
 
 my $val;
-while (read($fh, $val, 1)) {
+while (read($fh, $val, 3)) {
     $spinner->advance();
     $port->write($val);
     select(undef, undef, undef, 0.001);
