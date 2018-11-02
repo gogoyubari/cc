@@ -1,37 +1,41 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use constant {
+    SOH => 0x01,
+    EOT => 0x04,
+};
 
-# Enable command buffering.
 $| = 1;
 binmode STDIN;
 
 my $val;
 while(read STDIN, $val, 1) {
 
-    if (ord($val) == 0x01) {
-        my $sum = ord($val);
+    if (ord($val) == SOH) {
+        my @val;
+        push @val, $val;
         
         read STDIN, my $type, 1;
-        $sum += ord($type);
+        push @val, $type;
         
         read STDIN, my $count, 1;
-        $sum += ord($count);
+        push @val, $count;
         
         my @cc_data;
         for (my $i = 0; $i < ord($count)-5; $i++) {
             read STDIN, $val, 1;
             push @cc_data, $val;
-            $sum += ord($val);
+            push @val, $val;
         }
         
         read STDIN, my $checksum, 1;
-        $sum += ord($checksum);
+        push @val, $checksum;
         
         read STDIN, my $eot, 1;
-        $sum += ord($eot);
+        push @val, $eot;
         
-        if ((ord($eot) == 0x04) && ($sum % 256 == 0)) {
+        if ((ord($eot) == EOT) && checksum(@val)) {
         
             # DTVCC packet (ATVCC data)
             next if (ord($type) != 0x41);           
@@ -282,4 +286,12 @@ while(read STDIN, $val, 1) {
 
 close STDIN;
 
+
+sub checksum {
+    my $sum;
+    foreach my $val (@_) {
+        $sum += ord($val);
+    }
+    return !($sum % 256);
+}
 
