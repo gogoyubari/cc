@@ -3,14 +3,15 @@ use strict;
 use warnings;
 use FindBin;
 use IO::Handle 'autoflush';
-STDOUT->autoflush(1);
+
 my $file = "$FindBin::Bin/data.bin";
+STDOUT->autoflush(1);
 
 open(my $fh, "<", $file) || die $!;
 binmode $fh;
 
 my $val;
-while (read $fh, $val, 1) {
+while (read $fh, $val, 3) {
     if (ord($val) < 0x20) {
         #print '<',  ord($val), '>';
         print $val;
@@ -20,6 +21,7 @@ while (read $fh, $val, 1) {
     } else {
         print $val;
     }
+    select(undef, undef, undef, 0.001);
 }
 close($fh);
 exit 0;
