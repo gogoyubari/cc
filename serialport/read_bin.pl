@@ -11,14 +11,14 @@ open(my $fh, "<", $file) || die $!;
 binmode $fh;
 
 my $val;
-while (read $fh, $val, 3) {
-    if (ord($val) < 0x20) {
-        #print '<',  ord($val), '>';
+while (read $fh, $val, 1) {
+    if ($val =~ /[\x00-\x1F]/) {
+        #printf "[%02X]", ord($val);
         print $val;
-    } elsif (ord($val) >= 0x7F) {
-        #print '<',  ord($val), '>';
+    } elsif ($val =~ /[\x20-\x7F]/) {
         print $val;
-    } else {
+    } elsif ($val =~ /[\x80-\xFF]/) {
+        #printf "[%02X]", ord($val);
         print $val;
     }
     select(undef, undef, undef, 0.001);

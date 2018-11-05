@@ -83,15 +83,26 @@ sub checksum {
 # CL Group: C0 Subset of ASCII Control Codes
 sub c0_table {
     my ($signi_code, $block_data) = @_;
-=pod
-    if ($signi_code =~ /\x00/) {print qq/[NUL]/;}
-    elsif ($signi_code =~ /\x03/) {print qq/[ETX]/;}
-    elsif ($signi_code =~ /\x08/) {print qq/[BS]/;}
-    elsif ($signi_code =~ /\x0C/) {print qq/[FF]/;}
-    elsif ($signi_code =~ /\x0D/) {print qq/[CR]/;}
-    elsif ($signi_code =~ /\x0E/) {print qq/[HCR]/;}
-=cut
-    if ($signi_code =~ /\x10/) {
+
+    if ($signi_code =~ /\x00/) {
+        #print qq/[NUL]/;
+    }
+    elsif ($signi_code =~ /\x03/) {
+        #print qq/[ETX]/;
+    }
+    elsif ($signi_code =~ /\x08/) {
+        #print qq/[BS]/;
+    }
+    elsif ($signi_code =~ /\x0C/) {
+        #print qq/[FF]/;
+    }
+    elsif ($signi_code =~ /\x0D/) {
+        #print qq/[CR]/;
+    }
+    elsif ($signi_code =~ /\x0E/) {
+        #print qq/[HCR]/;
+    }
+    elsif ($signi_code =~ /\x10/) {
         #print qq/[EXT1]/;
         my $extended_signi_code = shift @$block_data;
         
@@ -139,35 +150,34 @@ sub c1_table {
 
     # SetCurrentWindow0-7
     if ($signi_code =~ /[\x80-\x87]/) {
-        my $currentwindow_num = $signi_code & 0b1111;
-        #print qq/[CW$currentwindow_num]/;
+        my $currentwindow_num = ord($signi_code) & 0b1111;
+        print qq/[CW$currentwindow_num]/;
     }
     
     # CtrlWindows
     elsif ($signi_code =~ /[\x88-\x8C]/) {
         my $window_bitmap = shift @$block_data;
-=pod
+
         # ClearWindows
         if ($signi_code =~ /\x88/) {
-            print qq/[CLW]/; printf "{%08b}", ord($window_bitmap);
+            #print qq/[CLW]/; printf "{%08b}", ord($window_bitmap);
         }
         # DisplayWindows
         elsif ($signi_code =~ /\x89/) {
-            print qq/[DSW]/; printf "{%08b}", ord($window_bitmap);
+            #print qq/[DSW]/; printf "{%08b}", ord($window_bitmap);
         } 
         # HideWindows
         elsif ($signi_code =~ /\x8A/) {
-            print qq/[HDW]/; printf "{%08b}", ord($window_bitmap);
+            #print qq/[HDW]/; printf "{%08b}", ord($window_bitmap);
         }
         # ToggleWindows
         elsif ($signi_code =~ /\x8B/) {
-            print qq/[TGW]/; printf "{%08b}", ord($window_bitmap);
+            #print qq/[TGW]/; printf "{%08b}", ord($window_bitmap);
         }
         # DeleteWindows
         elsif ($signi_code =~ /\x8C/) {
-            print qq/[DLW]/; printf "{%08b}", ord($window_bitmap);
+            #print qq/[DLW]/; printf "{%08b}", ord($window_bitmap);
         }
-=cut
     }
                     
     # Delay
@@ -175,12 +185,16 @@ sub c1_table {
         my $tenths_of_seconds = ord(shift @$block_data) / 10;
         #print qq/[DLY]/, qq/{$tenths_of_seconds}/;
     }
-=pod
+
     # DelayCancel
-    elsif ($signi_code =~ /\x8E/) {print qq/[DLC]/;}
+    elsif ($signi_code =~ /\x8E/) {
+        #print qq/[DLC]/;
+    }
+
     # Reset
-    elsif ($signi_code =~ /\x8F/) {print qq/[RST]/;}
-=cut
+    elsif ($signi_code =~ /\x8F/) {
+        #print qq/[RST]/;
+    }
 
     # SetPenAttributes
     elsif ($signi_code =~ /\x90/) {
@@ -188,7 +202,6 @@ sub c1_table {
         for (0 .. 1) {
             push @SetPenAttributes, ord(shift @$block_data);
         }
-=pod
         my $pen_size = $SetPenAttributes[0] & 0b11;
         my $offset = $SetPenAttributes[0] >> 2 & 0b11;
         my $text_tag = $SetPenAttributes[0] >> 4 & 0b1111;
@@ -196,16 +209,15 @@ sub c1_table {
         my $edge_type = $SetPenAttributes[1] >> 3 & 0b111;
         my $underline = $SetPenAttributes[1] >> 6 & 0b1;
         my $italic = $SetPenAttributes[1] >> 7 & 0b1;
-        print qq/[SPA]/, qq/{$pen_size:$offset:$text_tag:$font_tag:$edge_type:$underline:$italic}/;
-=cut
+        #print qq/[SPA]/, qq/{$pen_size:$offset:$text_tag:$font_tag:$edge_type:$underline:$italic}/;
     }
+
     # SetPenColor
     elsif ($signi_code =~ /\x91/) {
         my @SetPenColor;
         for (0 .. 2) {
             push @SetPenColor, ord(shift @$block_data);
         }
-=pod
         my $forground_color_op = $SetPenColor[0] >> 6 & 0b11;
         my $forground_color_r = $SetPenColor[0] >> 4 & 0b11;
         my $forground_color_g = $SetPenColor[0] >> 2 & 0b11;
@@ -218,9 +230,9 @@ sub c1_table {
         my $edge_color_r = $SetPenColor[2] >> 4 & 0b11;
         my $edge_color_g = $SetPenColor[2] >> 2 & 0b11;
         my $edge_color_b = $SetPenColor[2] >> 0 & 0b11;
-        print qq/[SPC]/, qq/{$forground_color_op$forground_color_r$forground_color_g$forground_color_b:$background_color_op$background_color_r$background_color_g$background_color_b:$edge_color_op$edge_color_r$edge_color_g$edge_color_b}/;
-=cut
+        #print qq/[SPC]/, qq/{$forground_color_op$forground_color_r$forground_color_g$forground_color_b:$background_color_op$background_color_r$background_color_g$background_color_b:$edge_color_op$edge_color_r$edge_color_g$edge_color_b}/;
     }
+
     # SetPenLocation
     elsif ($signi_code =~ /\x92/) {
         my @SetPenLocation;
@@ -232,13 +244,13 @@ sub c1_table {
         #print qq/[SPL]/, qq/{$row:$column}/;
         if ($column == 0) {print qq/\n/;}
     }
+
     # SetWindowAttributes
     elsif ($signi_code =~ /\x97/) {
         my @SetWindowAttributes;
         for (0 .. 3) {
             push @SetWindowAttributes, ord(shift @$block_data);
         }
-=pod
         my $fill_color_op = $SetWindowAttributes[0] >> 6 & 0b11;
         my $fill_color_r = $SetWindowAttributes[0] >> 4 & 0b11;
         my $fill_color_g = $SetWindowAttributes[0] >> 2 & 0b11;
@@ -256,8 +268,7 @@ sub c1_table {
         my $display_effect = $SetWindowAttributes[3] >> 0 & 0b11;
         my $effect_direction = $SetWindowAttributes[3] >> 2 & 0b11;
         my $effect_speed = ($SetWindowAttributes[3] >> 4 & 0b1111) * 0.5;
-        print qq/[SWA]/, qq/{$fill_color_r$fill_color_g$fill_color_b:$fill_color_op:$border_color_r$border_color_g$border_color_b:$border_type:$justify:$scroll_direction:$print_direction:$word_wrap $display_effect:$effect_direction:$effect_speed}/;
-=cut
+        #print qq/[SWA]/, qq/{$fill_color_r$fill_color_g$fill_color_b:$fill_color_op:$border_color_r$border_color_g$border_color_b:$border_type:$justify:$scroll_direction:$print_direction:$word_wrap $display_effect:$effect_direction:$effect_speed}/;
     }
     
     # DefineWindow0–7
@@ -266,8 +277,7 @@ sub c1_table {
         for (0 .. 5) {
             push @definewindow_parameters, ord(shift @$block_data);
         }
-=pod
-        my $definewindow_num = $signi_code & 0b111;
+        my $definewindow_num = ord($signi_code) & 0b111;
         my $priority = $definewindow_parameters[0] & 0b111;
         my $column_lock = $definewindow_parameters[0] >> 3 & 0b1;
         my $row_lock = $definewindow_parameters[0] >> 4 & 0b1;
@@ -280,8 +290,7 @@ sub c1_table {
         my $colmn_count = $definewindow_parameters[4] & 0b111111;
         my $pen_style = $definewindow_parameters[5] & 0b111;
         my $window_style = $definewindow_parameters[5] >> 3 & 0b111;
-        print qq/[DF$definewindow_num]/, qq/{$priority:$column_lock:$row_lock:$visible:$anchor_vertical:$relative_positioning:$anchor_horizontal:$row_count:$anchor_ID:$colmn_count:$pen_style:$window_style}/;
-=cut
+        #print qq/[DF$definewindow_num]/, qq/{$priority:$column_lock:$row_lock:$visible:$anchor_vertical:$relative_positioning:$anchor_horizontal:$row_count:$anchor_ID:$colmn_count:$pen_style:$window_style}/;
     }
 }
                 
