@@ -10,8 +10,7 @@ STDOUT->autoflush(1);
 open(my $fh, "<", $file) || die $!;
 binmode $fh;
 
-my $val;
-while (read $fh, $val, 1) {
+while (read $fh, my $val, 1) {
     if ($val =~ /[\x00-\x1F]/) {
         #printf "[%02X]", ord($val);
         print $val;

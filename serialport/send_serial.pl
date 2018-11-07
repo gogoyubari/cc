@@ -21,8 +21,7 @@ my $spinner = Term::Spinner->new();
 open(my $fh, "<", $file) || die $!;
 binmode $fh;
 
-my $val;
-while (read($fh, $val, 3)) {
+while (read($fh, my $val, 3)) {
     $spinner->advance();
     $port->write($val);
     select(undef, undef, undef, 0.001);

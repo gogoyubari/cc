@@ -9,6 +9,7 @@ while(read STDIN, my $soh, 1) {
 
     next unless ($soh =~ /\x01/);
 
+    # Grand Alliance Protocol
     my @sum;
     push @sum, $soh;
     
@@ -27,11 +28,15 @@ while(read STDIN, my $soh, 1) {
     
     read STDIN, my $eot, 1;
     push @sum, $eot;
+
+    next unless ($eot =~ /\x04/);
     
-    if (($eot =~ /\x04/) && checksum(\@sum)) {
-    
-        # DTVCC packet (ATVCC data)
+    # DTVCC packet
+    if (checksum(\@sum)) {
+
         next unless ($type =~ /\x41/);           
+    
+        # ATVCC data
         next unless @cc_data;
         my $seq_num = ord($cc_data[0]) >> 6 & 0b11;
         my $packet_size = ord($cc_data[0]) & 0b111111;
@@ -48,7 +53,7 @@ while(read STDIN, my $soh, 1) {
         my @block_data = splice @packet_data, 1, $block_size;
         
         # block_data
-        while (my $signi_code = shift @block_data) {
+        while (defined(my $signi_code = shift @block_data)) {
             # CL Group: C0 Subset of ASCII Control Codes
             if ($signi_code =~ /[\x00-\x1F]/) {
                 c0_table($signi_code, \@block_data);
@@ -67,7 +72,7 @@ while(read STDIN, my $soh, 1) {
             }
         }
     } else {
-        print qq/\nChecksum err:\n\n/;
+        warn qq/\nChecksum err:\n\n/;
     }
 }
 
@@ -151,7 +156,7 @@ sub c1_table {
     # SetCurrentWindow0-7
     if ($signi_code =~ /[\x80-\x87]/) {
         my $currentwindow_num = ord($signi_code) & 0b1111;
-        print qq/[CW$currentwindow_num]/;
+        #print qq/[CW$currentwindow_num]/;
     }
     
     # CtrlWindows
@@ -160,30 +165,30 @@ sub c1_table {
 
         # ClearWindows
         if ($signi_code =~ /\x88/) {
-            #print qq/[CLW]/; printf "{%08b}", ord($window_bitmap);
+            #printf "[CLW]{%08b}", ord($window_bitmap);
         }
         # DisplayWindows
         elsif ($signi_code =~ /\x89/) {
-            #print qq/[DSW]/; printf "{%08b}", ord($window_bitmap);
+            #printf "[DSW]{%08b}", ord($window_bitmap);
         } 
         # HideWindows
         elsif ($signi_code =~ /\x8A/) {
-            #print qq/[HDW]/; printf "{%08b}", ord($window_bitmap);
+            #printf "[HDW]{%08b}", ord($window_bitmap);
         }
         # ToggleWindows
         elsif ($signi_code =~ /\x8B/) {
-            #print qq/[TGW]/; printf "{%08b}", ord($window_bitmap);
+            #printf "[TGW]{%08b}", ord($window_bitmap);
         }
         # DeleteWindows
         elsif ($signi_code =~ /\x8C/) {
-            #print qq/[DLW]/; printf "{%08b}", ord($window_bitmap);
+            #printf "[DLW]{%08b}", ord($window_bitmap);
         }
     }
                     
     # Delay
     elsif ($signi_code =~ /\x8D/) {
         my $tenths_of_seconds = ord(shift @$block_data) / 10;
-        #print qq/[DLY]/, qq/{$tenths_of_seconds}/;
+        #print qq/[DLY]{$tenths_of_seconds}/;
     }
 
     # DelayCancel
@@ -209,7 +214,7 @@ sub c1_table {
         my $edge_type = $SetPenAttributes[1] >> 3 & 0b111;
         my $underline = $SetPenAttributes[1] >> 6 & 0b1;
         my $italic = $SetPenAttributes[1] >> 7 & 0b1;
-        #print qq/[SPA]/, qq/{$pen_size:$offset:$text_tag:$font_tag:$edge_type:$underline:$italic}/;
+        #print qq/[SPA]{$pen_size:$offset:$text_tag:$font_tag:$edge_type:$underline:$italic}/;
     }
 
     # SetPenColor
@@ -230,7 +235,7 @@ sub c1_table {
         my $edge_color_r = $SetPenColor[2] >> 4 & 0b11;
         my $edge_color_g = $SetPenColor[2] >> 2 & 0b11;
         my $edge_color_b = $SetPenColor[2] >> 0 & 0b11;
-        #print qq/[SPC]/, qq/{$forground_color_op$forground_color_r$forground_color_g$forground_color_b:$background_color_op$background_color_r$background_color_g$background_color_b:$edge_color_op$edge_color_r$edge_color_g$edge_color_b}/;
+        #print qq/[SPC]{$forground_color_op$forground_color_r$forground_color_g$forground_color_b:$background_color_op$background_color_r$background_color_g$background_color_b:$edge_color_op$edge_color_r$edge_color_g$edge_color_b}/;
     }
 
     # SetPenLocation
@@ -241,7 +246,7 @@ sub c1_table {
         }
         my $row = $SetPenLocation[0] & 0b1111;
         my $column = $SetPenLocation[1] & 0b111111;
-        #print qq/[SPL]/, qq/{$row:$column}/;
+        #print qq/[SPL]{$row:$column}/;
         if ($column == 0) {print qq/\n/;}
     }
 
@@ -268,7 +273,7 @@ sub c1_table {
         my $display_effect = $SetWindowAttributes[3] >> 0 & 0b11;
         my $effect_direction = $SetWindowAttributes[3] >> 2 & 0b11;
         my $effect_speed = ($SetWindowAttributes[3] >> 4 & 0b1111) * 0.5;
-        #print qq/[SWA]/, qq/{$fill_color_r$fill_color_g$fill_color_b:$fill_color_op:$border_color_r$border_color_g$border_color_b:$border_type:$justify:$scroll_direction:$print_direction:$word_wrap $display_effect:$effect_direction:$effect_speed}/;
+        #print qq/[SWA]{$fill_color_r$fill_color_g$fill_color_b:$fill_color_op:$border_color_r$border_color_g$border_color_b:$border_type:$justify:$scroll_direction:$print_direction:$word_wrap $display_effect:$effect_direction:$effect_speed}/;
     }
     
     # DefineWindow0–7
@@ -290,7 +295,7 @@ sub c1_table {
         my $colmn_count = $definewindow_parameters[4] & 0b111111;
         my $pen_style = $definewindow_parameters[5] & 0b111;
         my $window_style = $definewindow_parameters[5] >> 3 & 0b111;
-        #print qq/[DF$definewindow_num]/, qq/{$priority:$column_lock:$row_lock:$visible:$anchor_vertical:$relative_positioning:$anchor_horizontal:$row_count:$anchor_ID:$colmn_count:$pen_style:$window_style}/;
+        #print qq/[DF$definewindow_num]{$priority:$column_lock:$row_lock:$visible:$anchor_vertical:$relative_positioning:$anchor_horizontal:$row_count:$anchor_ID:$colmn_count:$pen_style:$window_style}/;
     }
 }
                 
@@ -303,5 +308,5 @@ sub g0_table {
 # GR Group: G1 ISO 8859-1 Latin 1 Characters (>chcp 28591)
 sub g1_table {
     my $signi_code = shift;
-    print $signi_code;
+    #print $signi_code;
 }
