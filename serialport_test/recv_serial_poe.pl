@@ -25,14 +25,14 @@ sub setup_device {
     my $heap = $_[HEAP];
 
     my $handle = gensym();
-    my $port = tie(*$handle, "Device::SerialPort", PORT) || die $!;
+    my $port = tie(*$handle, "Device::SerialPort", PORT) or die $!;
     $port->datatype('raw');
     $port->baudrate(19200);
     $port->databits(8);
     $port->parity('none');
     $port->stopbits(1);
     $port->handshake('none');
-    $port->write_settings() || die $!;
+    $port->write_settings() or die $!;
 
     $heap->{port_wheel} = POE::Wheel::ReadWrite->new(
         Handle => $handle,

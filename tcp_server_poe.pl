@@ -46,7 +46,7 @@ exit;
 sub session_start {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    open(my $handle, '-|', $cmd) || die $!;
+    open(my $handle, '-|', $cmd) or die $!;
     $heap->{wheel} = POE::Wheel::ReadWrite->new(
         InputHandle => $handle,
         OutputHandle => \*STDOUT,

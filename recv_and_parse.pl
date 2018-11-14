@@ -7,7 +7,7 @@ use Symbol qw(gensym);
 use FindBin;
 use constant PORT => '/dev/ttyUSB1';
 
-my $parse_cmd = "$FindBin::Bin/../parse/ga_parse.pl";
+my $parse_cmd = "$FindBin::Bin/ga_parse.pl";
 
 
 POE::Session->create(
@@ -25,16 +25,16 @@ sub setup_device {
     my $heap = $_[HEAP];
 
     my $serial_handle = gensym();
-    my $port = tie(*$serial_handle, "Device::SerialPort", PORT) || die $!;
+    my $port = tie(*$serial_handle, "Device::SerialPort", PORT) or die $!;
     $port->datatype('raw');
     $port->baudrate(19200);
     $port->databits(8);
     $port->parity('none');
     $port->stopbits(1);
     $port->handshake('none');
-    $port->write_settings() || die $!;
+    $port->write_settings() or die $!;
 
-    open(my $output_handle, '|-', $parse_cmd) || die $!;
+    open(my $output_handle, '|-', $parse_cmd) or die $!;
 
     $heap->{wheel} = POE::Wheel::ReadWrite->new(
         InputHandle => $serial_handle,

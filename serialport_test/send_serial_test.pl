@@ -8,17 +8,17 @@ use constant PORT => '/dev/ttyUSB0';
 
 my $file = "$FindBin::Bin/data.bin";
 
-my $port = Device::SerialPort->new(PORT) || die $!;
+my $port = Device::SerialPort->new(PORT) or die $!;
 $port->baudrate(19200);
 $port->databits(8);
 $port->parity('none');
 $port->stopbits(1);
 $port->handshake('none');
-$port->write_settings() || die $!;
+$port->write_settings() or die $!;
 
 my $spinner = Term::Spinner->new();
 
-open(my $fh, "<", $file) || die $!;
+open(my $fh, "<", $file) or die $!;
 binmode $fh;
 
 while (read($fh, my $val, 3)) {
@@ -28,5 +28,5 @@ while (read($fh, my $val, 3)) {
 }
 
 close $fh;
-$port->close() || warn;
+$port->close() or warn;
 exit 0;

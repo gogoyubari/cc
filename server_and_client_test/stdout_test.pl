@@ -9,11 +9,11 @@ my @str = ("\x0D", @str1, "\x0D", @str2);
 $| = 1;
 
 while (1) {
-	foreach (@str) {
-		if (ord($_) >= 0x20 && ord($_) <= 0x7F) {
+	for (@str) {
+		if ($_ =~ /[\x20-\x7F]/) {
 			print $_;
 		}
-		if (ord($_) == 0x0D) {
+		elsif ($_ =~ /\x0D/) {
 			print "\n"
 		}
 		select(undef, undef, undef, 0.03);

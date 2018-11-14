@@ -7,7 +7,7 @@ use IO::Handle 'autoflush';
 my $file = "$FindBin::Bin/data.bin";
 STDOUT->autoflush(1);
 
-open(my $fh, "<", $file) || die $!;
+open(my $fh, "<", $file) or die $!;
 binmode $fh;
 
 while (read $fh, my $val, 1) {

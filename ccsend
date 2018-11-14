@@ -2,6 +2,6 @@
 
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 perl \
-$SCRIPT_DIR/server_and_client/tcp_server_poe.pl \
-$SCRIPT_DIR/serialport/recv_and_parse.pl \
+$SCRIPT_DIR/tcp_server_poe.pl \
+$SCRIPT_DIR/recv_and_parse.pl \
 $SCRIPT_DIR/pipe.pl
