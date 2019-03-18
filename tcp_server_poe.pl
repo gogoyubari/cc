@@ -61,7 +61,7 @@ sub got_input {
     foreach my $id (keys %clients) {
         $clients{$id}->put($data);
     }
-    $spinner->advance();
+    #$spinner->advance();
 }
 
 sub client_preconnect {
