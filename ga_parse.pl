@@ -19,7 +19,7 @@ while(read STDIN, my $soh, 1) {
     read STDIN, my $count, 1;
     push @sum, $count;
     
-    read STDIN, my $cc_data, ord($count)-5;
+    read STDIN, my $cc_data, ord($count)>5 ? ord($count)-5 : 0;
     my @cc_data = split(//, $cc_data);
     push @sum, @cc_data;
     

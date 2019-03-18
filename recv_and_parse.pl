@@ -5,7 +5,9 @@ use POE qw(Wheel::ReadWrite Filter::Stream);
 use Device::SerialPort;
 use Symbol qw(gensym);
 use FindBin;
-use constant PORT => '/dev/ttyUSB1';
+# /etc/udev/rules.d/99-local.rules
+# KERNEL=="ttyUSB*",  ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ttyUSB_FT232"
+use constant PORT => '/dev/ttyUSB_FT232';
 
 my $parse_cmd = "$FindBin::Bin/ga_parse.pl";
 
