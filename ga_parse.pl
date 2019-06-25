@@ -103,6 +103,7 @@ sub c0_table {
     }
     elsif ($signi_code =~ /\x0D/) {
         #print qq/[CR]/;
+        print qq/\n/;
     }
     elsif ($signi_code =~ /\x0E/) {
         #print qq/[HCR]/;
@@ -247,7 +248,6 @@ sub c1_table {
         my $row = $SetPenLocation[0] & 0b1111;
         my $column = $SetPenLocation[1] & 0b111111;
         #print qq/[SPL]{$row:$column}/;
-        if ($column == 0) {print qq/\n/;}
     }
 
     # SetWindowAttributes
